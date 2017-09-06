@@ -12,6 +12,7 @@ import time
 
 # 3rd party
 from docker import Client, tls
+from docker.errors import NotFound
 
 # project
 from utils.singleton import Singleton
@@ -585,14 +586,14 @@ class DockerUtil:
                         name = image_spec['RepoTags'][0]
                         self._image_sha_to_name_mapping[image] = name
                         return name
-                    except (LookupError, TypeError) as e:
+                    except (LookupError, NotFound, TypeError) as e:
                         log.debug("Failed finding image name in RepoTag, trying RepoDigests: %s", e)
                     try:
                         name = image_spec['RepoDigests'][0]
                         name = name.split('@')[0]   # Last resort, we get the name with no tag
                         self._image_sha_to_name_mapping[image] = name
                         return name
-                    except (LookupError, TypeError) as e:
+                    except (LookupError, NotFound, TypeError) as e:
                         log.debug("Failed finding image name in RepoTag and RepoDigests: %s", e)
             except Exception:
                 log.exception("Exception getting docker image name")
